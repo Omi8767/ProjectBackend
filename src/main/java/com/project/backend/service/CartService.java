@@ -9,6 +9,7 @@ import com.project.backend.repository.CustomerRepository;
 import com.project.backend.repository.ProductRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -75,6 +76,7 @@ public class CartService {
         cartRepository.deleteById(id);
     }
 
+    @Transactional
     public void clearCart(Long customerId){
         cartRepository.deleteByCustomerId(customerId);
     }
