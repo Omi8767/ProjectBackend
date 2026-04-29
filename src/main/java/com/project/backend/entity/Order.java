@@ -23,7 +23,7 @@ public class Order {
     @Embedded
     private ShippingInfo shipping;
 
-    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")
     private List<OrderItem>  items;
 

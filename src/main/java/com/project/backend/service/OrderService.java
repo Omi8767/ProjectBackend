@@ -98,6 +98,8 @@ public class OrderService {
 
         payment.setStatus("PENDING");
 
+        paymentRepository.save(payment);
+
         return new ResponseEntity<>(savedOrder,HttpStatus.CREATED);
 
     }
