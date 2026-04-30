@@ -54,6 +54,7 @@ public class OrderService {
             oi.setPrice(product.getPrice());
             oi.setTotal(product.getPrice() * it.getQuantity());
 
+
             orderItems.add(oi);
 
             product.setStock(product.getStock() - it.getQuantity());
@@ -95,6 +96,9 @@ public class OrderService {
         payment.setDiscountPercent(discountPercent);
         payment.setGstAmount(gst);
         payment.setDiscountAmount(discount);
+
+        double netAmount = total +gst - discount;
+        payment.setNetAmount(netAmount);
 
         payment.setStatus("PENDING");
 
