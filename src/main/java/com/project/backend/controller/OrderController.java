@@ -3,10 +3,7 @@ package com.project.backend.controller;
 import com.project.backend.DTO.OrderRequestDTO;
 import com.project.backend.service.OrderService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -20,5 +17,10 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> placeOrder(@RequestBody OrderRequestDTO dto){
         return orderService.placeOrder(dto);
+    }
+
+    @GetMapping("/{customerId}/customer")
+    public ResponseEntity<?> getOrderByCustomer(@PathVariable Long customerId){
+       return orderService.getOrderByCustomer(customerId);
     }
 }

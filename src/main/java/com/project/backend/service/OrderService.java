@@ -107,4 +107,9 @@ public class OrderService {
         return new ResponseEntity<>(savedOrder,HttpStatus.CREATED);
 
     }
+
+    public ResponseEntity<?> getOrderByCustomer(Long customerId){
+        List<Order> byCustomerId = orderRepository.findByCustomer_Id(customerId);
+        return ResponseEntity.ok(byCustomerId);
+    }
 }
