@@ -1,6 +1,7 @@
 package com.project.backend.controller;
 
 import com.project.backend.DTO.OrderRequestDTO;
+import com.project.backend.entity.Order;
 import com.project.backend.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,5 +23,11 @@ public class OrderController {
     @GetMapping("/{customerId}/customer")
     public ResponseEntity<?> getOrderByCustomer(@PathVariable Long customerId){
        return orderService.getOrderByCustomer(customerId);
+    }
+
+    @PutMapping("/{orderId}/cancel")
+    public ResponseEntity<Order> cancelOrder(@PathVariable Long orderId){
+        Order order = orderService.cancelOrder(orderId);
+        return ResponseEntity.ok(order);
     }
 }

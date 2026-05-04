@@ -99,7 +99,7 @@ public class PaymentService {
                 payment.setPaymentMethod("Card");
                 payment.setPaymentDate(LocalDate.now());
                 payment.setPaymentTime(LocalDateTime.now());
-
+                payment.setTransactionRef(session.getPaymentIntent());
                 Order order = payment.getOrder();
                 order.setStatus("CONFIRMED");
 

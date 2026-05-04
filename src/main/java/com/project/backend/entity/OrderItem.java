@@ -13,6 +13,8 @@ public class OrderItem {
     private Integer quantity;
     private Double price;
     private Double total;
+    @Lob
+    private String imageUrl;
 
     public Long getId() {
         return id;
@@ -60,5 +62,13 @@ public class OrderItem {
 
     public void setTotal(Double total) {
         this.total = total;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

@@ -20,13 +20,17 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CustomerRepository customerRepository;
+    private final StripeService stripeService;
+    private final EmailService emailService;
 
-    public OrderService(OrderRepository orderRepository, PaymentRepository paymentRepository, ProductRepository productRepository, CartRepository cartRepository, CustomerRepository customerRepository) {
+    public OrderService(OrderRepository orderRepository, PaymentRepository paymentRepository, ProductRepository productRepository, CartRepository cartRepository, CustomerRepository customerRepository, StripeService stripeService, EmailService emailService) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.customerRepository = customerRepository;
+        this.stripeService = stripeService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -53,6 +57,7 @@ public class OrderService {
             oi.setQuantity(it.getQuantity());
             oi.setPrice(product.getPrice());
             oi.setTotal(product.getPrice() * it.getQuantity());
+            oi.setImageUrl(product.getImages().get(0).getImageUrl());
 
 
             orderItems.add(oi);
@@ -111,5 +116,85 @@ public class OrderService {
     public ResponseEntity<?> getOrderByCustomer(Long customerId){
         List<Order> byCustomerId = orderRepository.findByCustomer_Id(customerId);
         return ResponseEntity.ok(byCustomerId);
+    }
+
+    @Transactional
+    public Order cancelOrder(Long id) {
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (
+                order.getStatus().equals("DISPATCH") ||
+                        order.getStatus().equals("DELIVERED")
+        ) {
+            throw new RuntimeException("Order cannot be cancelled");
+        }
+
+        Payment payment = paymentRepository.findByOrder_Id(id).orElse(null);
+
+        // restore stock
+        for (OrderItem item : order.getItems()) {
+            Product p = productRepository.findById(item.getProductId())
+                    .orElseThrow();
+
+            p.setStock(p.getStock() + item.getQuantity());
+
+            productRepository.save(p);
+        }
+
+        String email = order.getCustomer().getEmail();
+        String subject;
+        String body;
+
+        // CARD REFUND
+        if (
+                payment != null &&
+                        "SUCCESS".equals(payment.getStatus()) &&
+                        "Card".equalsIgnoreCase(payment.getPaymentMethod())
+        ) {
+
+            try {
+                stripeService.refundPayment(payment.getTransactionRef());
+                payment.setStatus("REFUNDED");
+                paymentRepository.save(payment);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Refund failed");
+            }
+
+            subject = "Order Cancelled & Refund Initiated";
+            body =
+                    "Hello " + order.getCustomer().getName() + ",\n\n" +
+                            "Your order #" + order.getId() + " has been cancelled.\n\n" +
+                            " Since you paid via Card, your refund has been initiated.\n" +
+                            "It will be credited within 2-3 business days.\n\n" +
+                            "Thank you for shopping with us.";
+
+            emailService.sendSimpleEmail(email, subject, body);
+        }
+
+//  COD PAYMENT
+        if (
+                payment != null &&
+                        "COD".equalsIgnoreCase(payment.getPaymentMethod())
+        ) {
+
+            payment.setStatus("CANCELLED");
+            paymentRepository.save(payment);
+
+            subject = "Order Cancelled";
+            body =
+                    "Hello " + order.getCustomer().getName() + ",\n\n" +
+                            "Your order #" + order.getId() + " has been cancelled successfully.\n\n" +
+                            " Since this was Cash on Delivery, no payment was charged.\n\n" +
+                            "We hope to serve you again.";
+
+            emailService.sendSimpleEmail(email, subject, body);
+        }
+
+        order.setStatus("CANCELLED");
+
+        return orderRepository.save(order);
     }
 }

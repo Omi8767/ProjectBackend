@@ -1,6 +1,9 @@
 package com.project.backend.service;
 
+import com.stripe.exception.StripeException;
+import com.stripe.model.Refund;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.stereotype.Service;
 
@@ -33,5 +36,15 @@ public class StripeService {
                         .build();
 
         return Session.create(params);
+    }
+
+    public Refund refundPayment(String paymentIntentId) throws StripeException {
+
+        RefundCreateParams params =
+                RefundCreateParams.builder()
+                        .setPaymentIntent(paymentIntentId)
+                        .build();
+
+        return Refund.create(params);
     }
 }
