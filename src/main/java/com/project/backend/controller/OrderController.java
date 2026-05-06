@@ -6,6 +6,9 @@ import com.project.backend.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -29,5 +32,22 @@ public class OrderController {
     public ResponseEntity<Order> cancelOrder(@PathVariable Long orderId){
         Order order = orderService.cancelOrder(orderId);
         return ResponseEntity.ok(order);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Order>> getAll(){
+        List<Order> allOrders = orderService.getAllOrders();
+        return ResponseEntity.ok(allOrders);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateOrder(@PathVariable Long id,@RequestParam String status){
+        return orderService.updateStatus(id,status);
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<Map<String,Object>> getDashboard(){
+        Map<String, Object> dashboard = orderService.getDashboard();
+        return  ResponseEntity.ok(dashboard);
     }
 }
