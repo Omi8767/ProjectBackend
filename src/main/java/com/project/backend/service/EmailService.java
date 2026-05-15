@@ -2,6 +2,7 @@ package com.project.backend.service;
 
 
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -47,5 +48,15 @@ public class EmailService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendOtp(String to, String otp) {
+
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(to);
+        msg.setSubject("Your OTP for Password Reset");
+        msg.setText("Your OTP is: " + otp);
+
+        mailSender.send(msg);
     }
 }
